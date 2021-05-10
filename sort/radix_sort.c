@@ -25,15 +25,22 @@
 
 BARRIER_INIT(my_barrier, NR_TASKLETS);
 
-__mram_noinit uint32_t mem[BUFFER_SIZE];				  // mram
+__mram_noinit uint32_t mem[BUFFER_SIZE];
 __dma_aligned uint32_t cache[2][NR_TASKLETS][CACHE_SIZE]; // wram
+
+void populate_data() {
+	uint32_t mem_temp[BUFFER_SIZE] = {33, 36, 27, 15, 43, 35, 36, 42, 49, 21, 12, 27, 40, 9, 13, 26, 40, 26, 22, 36, 11, 18, 17, 29, 32, 30, 12, 23, 17, 35, 29, 2, 22, 8, 19, 17, 43, 6, 11, 42, 29, 23, 21, 19, 34, 37, 48, 24, 15, 20, 13, 26, 41, 30, 6, 23, 12, 20, 46, 31, 5, 25, 34, 27};
+	for (int i = 0; i < BUFFER_SIZE; i++) {
+		mem[i] = mem_temp[i];
+	}
+}
 
 void print_arr(char *name, __mram_ptr uint32_t *arr, int size)
 {
     printf("%s: ", name);
     for (int i = 0; i < size; i++)
     {
-        printf("%u ", arr[i]);
+        printf("%02u ", arr[i]);
     }
     printf("\n\n");
 }
@@ -45,8 +52,8 @@ void merge(uint32_t *unmerged_wram,
 			uint32_t num_merged_chunks
 			)
 {
-	static seqreader_buffer_t local_cache;
-	static seqreader_t sr;
+	seqreader_buffer_t local_cache;
+	seqreader_t sr;
 
 	uint32_t merged_size, unmerged_size;
 	uint32_t merged_val, unmerged_val;
@@ -87,6 +94,9 @@ void merge(uint32_t *unmerged_wram,
 				merged_reader = seqread_get(merged_reader, sizeof(uint32_t), &sr);
 				merged_size--;
 			}
+			// if(merge_buf_wram[i] == 0) {
+			// 	printf("%d %d -- %u %u \n", merged_size, unmerged_size, *merged_reader, unmerged_val);
+			// }
 		}
 
 		// write merge_buf to empty
@@ -159,19 +169,17 @@ int main()
 		merge(cache[cache_type][tid], cache[cache_type ^ 1][tid], &mem[c + CACHE_SIZE], &mem[c], num_merged_chunks);
 		num_merged_chunks++;
 
-		if (tid == 0) {
-			print_arr("arr", mem, BUFFER_SIZE);
-		}
-
 		// write back sorted part
 		//mram_write(&cache[cache_type][tid][cache_type], &mem[c], sizeof(uint32_t) * CACHE_SIZE);
 	}
-	// MERGE
+
 
 	/*** End perf count ***/
 	barrier_wait(&my_barrier);
 	if (tid == 0)
 	{
+		// print_arr("arr", mem, BUFFER_SIZE);
+
 		// print results
 		perfcounter_t end_time = perfcounter_get();
 		// printf("%lu\n", end_time);

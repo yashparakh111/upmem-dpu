@@ -10,7 +10,7 @@
 #include "config.h"
 
 #ifndef DPU_BINARY
-#define DPU_BINARY "./radix_sort"
+#define DPU_BINARY "./build/radix_sort"
 #endif
 
 int comp(const void *elem1, const void *elem2)
@@ -28,7 +28,7 @@ void gen_rand_arr(uint32_t *arr, int size)
 {
   for (int i = 0; i < size; i++)
   {
-    arr[i] = rand() % 100;
+    arr[i] = rand() % 50;
   }
 }
 
@@ -37,7 +37,7 @@ void print_arr(char *name, uint32_t *arr, int size)
   printf("%s: ", name);
   for (int i = 0; i < size; i++)
   {
-    printf("%u ", arr[i]);
+    printf("%02u ", arr[i]);
   }
   printf("\n\n");
 }
@@ -46,6 +46,7 @@ bool verify_chunks(uint32_t *dpu_arr, uint32_t *cpu_arr, int size, int chunk_siz
 {
   uint32_t golden_chunk[chunk_size];
   uint32_t iters = size / chunk_size;
+  bool pass = true;
   for (int i = 0; i < iters; i++)
   {
     uint32_t base = i * chunk_size;
@@ -58,11 +59,11 @@ bool verify_chunks(uint32_t *dpu_arr, uint32_t *cpu_arr, int size, int chunk_siz
       {
         printf("Error at block: %d, idx: %d. Expected %d, got %d\n", i, j,
                golden_chunk[j], dpu_arr[base + j]);
-        return false;
+        pass = false;
       }
     }
   }
-  return true;
+  return pass;
 }
 
 void launch_dpu(uint32_t *in_arr, uint32_t *out_arr)
@@ -88,14 +89,14 @@ void launch_dpu(uint32_t *in_arr, uint32_t *out_arr)
   DPU_ASSERT(dpu_push_xfer(set, DPU_XFER_TO_DPU, "mem", 0, sizeof(uint32_t) * BUFFER_SIZE, DPU_XFER_ASYNC));
 
   // start executing program
-  DPU_ASSERT(dpu_launch(set, DPU_SYNCHRONOUS));
+  DPU_ASSERT(dpu_launch(set, DPU_ASYNCHRONOUS));
 
   // loops through each DPU in SET
   DPU_FOREACH(set, dpu, each_dpu)
   {
     // get data from the dpu
     DPU_ASSERT(dpu_prepare_xfer(dpu, &out_arr[each_dpu * BUFFER_SIZE]));
-    DPU_ASSERT(dpu_log_read(dpu, stdout));
+    // DPU_ASSERT(dpu_log_read(dpu, stdout));
   }
   DPU_ASSERT(dpu_push_xfer(set, DPU_XFER_FROM_DPU, "mem", 0, sizeof(uint32_t) * BUFFER_SIZE, DPU_XFER_ASYNC));
 
@@ -112,6 +113,9 @@ int main(void)
   uint32_t out_arr[ARRAY_SIZE];
   uint32_t out_arr_golden[ARRAY_SIZE];
 
+  assert(BLOCK_SIZE > CACHE_SIZE);
+  assert(ARRAY_SIZE >= BUFFER_SIZE);
+
   // generate input array
   gen_rand_arr(in_arr, ARRAY_SIZE);
 
@@ -122,9 +126,9 @@ int main(void)
   print_arr("In", in_arr, ARRAY_SIZE);
   print_arr("Out DPU", out_arr, ARRAY_SIZE);
   print_arr("Out CPU", out_arr_golden, ARRAY_SIZE);
-  if (verify_chunks(out_arr, in_arr, ARRAY_SIZE, ARRAY_SIZE))
-    printf("Successful chunk sorting\n");
+  if (verify_chunks(out_arr, in_arr, ARRAY_SIZE, ARRAY_SIZE / NR_TASKLETS))
+    printf("Success!\n");
   else
-    printf("Failure in chunk sorting\n");
+    printf("Fail!\n");
   return 0;
 }

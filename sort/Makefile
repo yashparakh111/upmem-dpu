@@ -1,14 +1,17 @@
 NR_TASKLETS ?= 1
+BUILD_DIR = build
 
 .PHONY: all clean
 
-all: host radix_sort
+all: $(BUILD_DIR)/host $(BUILD_DIR)/radix_sort
 
-host: host.c config.h
+$(BUILD_DIR)/host: host.c config.h
+	if [ ! -d $(BUILD_DIR) ]; then mkdir $(BUILD_DIR); fi
 	gcc --std=c99 -DNR_TASKLETS=$(NR_TASKLETS) host.c -o host `dpu-pkg-config --cflags --libs dpu`
 
-radix_sort: radix_sort.c config.h
-	dpu-upmem-dpurte-clang -O2 -DNR_TASKLETS=$(NR_TASKLETS) -o radix_sort radix_sort.c
+$(BUILD_DIR)/radix_sort: radix_sort.c config.h
+	if [ ! -d $(BUILD_DIR) ]; then mkdir $(BUILD_DIR); fi
+	dpu-upmem-dpurte-clang -O2 -DNR_TASKLETS=$(NR_TASKLETS) -o $(BUILD_DIR)/radix_sort radix_sort.c
 
 clean:
-	rm host radix_sort
+	rm -rf $(BUILD_DIR) host
