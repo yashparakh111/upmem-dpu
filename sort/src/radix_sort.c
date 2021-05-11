@@ -52,6 +52,7 @@ void merge(uint32_t *unmerged_wram,
 			uint32_t num_merged_chunks
 			)
 {
+	
 	seqreader_buffer_t local_cache;
 	seqreader_t sr;
 
@@ -126,7 +127,7 @@ int main()
 	uint32_t cache_type = 0;
 	uint32_t num_merged_chunks = 0;
 
-	// loop through each thread's block and sort it at a CACHE_SIZE granularity
+	// loop through each thread's block and sort it at a CACHE_SIZE granularity and perform merge
 	for (int c = ((tid + 1) * BLOCK_SIZE) - CACHE_SIZE; c >= tid * BLOCK_SIZE; c -= CACHE_SIZE)
 	{
 		// copy small part into the cache
@@ -172,6 +173,12 @@ int main()
 		// write back sorted part
 		//mram_write(&cache[cache_type][tid][cache_type], &mem[c], sizeof(uint32_t) * CACHE_SIZE);
 	}
+
+	barrier_wait(&my_barrier);
+
+
+	// merge sorted blocks
+	
 
 
 	/*** End perf count ***/
