@@ -27,4 +27,4 @@ $(BUILD_DIR)/radix_sort: $(SRC_DIR)/radix_sort.c $(INC_DIR)/config.h
 	dpu-upmem-dpurte-clang -O2 -Iinc -DNR_TASKLETS=$(NR_TASKLETS) -o $@ $(SRC_DIR)/radix_sort.c
 
 clean:
-	rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD_DIR) host
