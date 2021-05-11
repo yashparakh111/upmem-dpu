@@ -73,9 +73,9 @@ void verify(uint32_t *dpu_arr, uint32_t *golden_arr, uint32_t *cpu_arr, int size
     // printf("Chunk %d: %d\n", i, chunk_sorted);
   }
   if (pass)
-    printf("Chunks Sorted!\n");
+    printf("Chunks_Sorted ");
   else
-    printf("Chunks Unsorted!\n");
+    printf("Chunks_Unsorted ");
 
   // verify entire arry
   for (int i = 0; i < size; i++)
@@ -84,9 +84,9 @@ void verify(uint32_t *dpu_arr, uint32_t *golden_arr, uint32_t *cpu_arr, int size
       sorted = false;
   }
   if (sorted)
-    printf("Success!\n");
+    printf("Success ");
   else
-    printf("Failure!\n");
+    printf("Failure ");
 }
 
 void prepare_data(uint32_t nargs, uint32_t size, ...)
@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
   // print input array
   if (do_arr_print)
   {
-    print_arr("In", in_arr, 2048);
+    print_arr("In", in_arr, arr_size);
   }
 
   // perform cpu+dpu sort
@@ -167,8 +167,8 @@ int main(int argc, char *argv[])
   // print results
   if (do_arr_print)
   {
-    print_arr("Out DPU", out_arr, 2048);
-    print_arr("Out CPU", out_arr_golden, 2048);
+    print_arr("Out DPU", out_arr, arr_size);
+    print_arr("Out CPU", out_arr_golden, arr_size);
   }
 
   // verify results
@@ -176,7 +176,10 @@ int main(int argc, char *argv[])
   verify(out_arr, out_arr_golden, in_arr, arr_size, BUFFER_SIZE / NR_TASKLETS);
 
   // free array space
-  free_data(3, in_arr, out_arr, out_arr_golden);
+  // free_data(3, in_arr, out_arr, out_arr_golden);
+  // free(in_arr);
+  // free(out_arr);
+  // free(out_arr_golden);
 
   printf("%d %d %d %f\n", arr_size, CACHE_SIZE, execution_cycles, execution_time);
 

@@ -41,22 +41,24 @@ __host double execution_time;
 //     printf("\n\n");
 // }
 
-void merge(uint32_t *unmerged_wram,
+seqreader_buffer_t local_cache[NR_TASKLETS];
+seqreader_t sr[NR_TASKLETS];
+
+void merge(int tid,
+		   uint32_t *unmerged_wram,
 		   uint32_t *merge_buf_wram,
 		   __mram_ptr uint32_t *merged_mram,
 		   __mram_ptr uint32_t *empty_mram,
 		   uint32_t num_merged_chunks)
 {
 
-	seqreader_buffer_t local_cache;
-	seqreader_t sr;
-
 	uint32_t merged_size, unmerged_size;
 	uint32_t merged_val, unmerged_val;
 
 	// initialize seqreader
-	local_cache = seqread_alloc();
-	uint32_t *merged_reader = seqread_init(local_cache, merged_mram, &sr);
+	//local_cache[tid] = seqread_alloc();
+
+	uint32_t *merged_reader = seqread_init(local_cache[tid], merged_mram, &(sr[tid]));
 
 	unmerged_size = CACHE_SIZE;
 	merged_size = CACHE_SIZE * num_merged_chunks;
@@ -87,7 +89,7 @@ void merge(uint32_t *unmerged_wram,
 			else if ((unmerged_size == 0) || (unmerged_val >= merged_val))
 			{
 				merge_buf_wram[i] = merged_val;
-				merged_reader = seqread_get(merged_reader, sizeof(uint32_t), &sr);
+				merged_reader = seqread_get(merged_reader, sizeof(uint32_t), &(sr[tid]));
 				merged_size--;
 			}
 			// if(merge_buf_wram[i] == 0) {
@@ -98,10 +100,16 @@ void merge(uint32_t *unmerged_wram,
 		// write merge_buf to empty
 		mram_write(merge_buf_wram, empty_mram, sizeof(uint32_t) * CACHE_SIZE);
 
+		// if unmerged has been written out, nothing else to merge
+		if(unmerged_size == 0)
+			return;
+
 		// increment empty by CACHE_SIZE
 		empty_mram += CACHE_SIZE;
 	}
-	//mem_reset();
+
+	//fsb_free(alloc, (void *)local_cache);
+
 }
 
 int main()
@@ -117,11 +125,14 @@ int main()
 		// print_data();
 		perfcounter_config(COUNT_CYCLES, true);
 	}
+	
 	barrier_wait(&my_barrier);
 	/************************/
 
 	uint32_t cache_type = 0;
 	uint32_t num_merged_chunks = 0;
+
+	local_cache[tid] = seqread_alloc();
 
 	// loop through each thread's block and sort it at a CACHE_SIZE granularity and perform merge
 	for (int c = ((tid + 1) * BLOCK_SIZE) - CACHE_SIZE; c >= tid * BLOCK_SIZE; c -= CACHE_SIZE)
@@ -163,18 +174,19 @@ int main()
 		}
 
 		// n-way merge
-		merge(cache[cache_type][tid], cache[cache_type ^ 1][tid], &mem[c + CACHE_SIZE], &mem[c], num_merged_chunks);
+		merge(tid, cache[cache_type][tid], cache[cache_type ^ 1][tid], &mem[c + CACHE_SIZE], &mem[c], num_merged_chunks);
 		num_merged_chunks++;
-		
-		barrier_wait(&my_barrier);
-		mem_reset();
+
+		//barrier_wait(&my_barrier);
+		//mem_reset();
 
 		// write back sorted part
 		//mram_write(&cache[cache_type][tid][cache_type], &mem[c], sizeof(uint32_t) * CACHE_SIZE);
 	}
 
-	/*** End perf count ***/
 	barrier_wait(&my_barrier);
+
+	/*** End perf count ***/
 	if (tid == 0)
 	{
 		// print results

@@ -37,9 +37,10 @@ void sort_dpu(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
 
     num_dpu_needed = (size + (BUFFER_SIZE - 1)) / BUFFER_SIZE;
     int dpu_loop_cnt = (num_dpu_needed + (num_dpus - 1)) / num_dpus;
-    /*printf("Number of DPUs needed: %d\n", num_dpu_needed);
-    printf("Using %u dpu(s)\n", num_dpus);
-    printf("Using %u dpu loop(s)\n", dpu_loop_cnt);*/
+
+    //printf("Number of DPUs needed: %d\n", num_dpu_needed);
+    //printf("Using %u dpu(s)\n", num_dpus);
+    //printf("Using %u dpu loop(s)\n", dpu_loop_cnt);
 
     // load the binary into the dpu
     DPU_ASSERT(dpu_load(set, DPU_BINARY, NULL));
@@ -50,10 +51,11 @@ void sort_dpu(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
     {
         //printf("loop: %d\n", dpu_loop);
         //may not need all dpus for last loop -- TODO
-        //num_dpu_needed_iter = ((dpu_loop + 1) == dpu_loop_cnt) ? (num_dpu_needed % num_dpus) : num_dpus;
+        uint32_t num_dpu_needed_iter = ((dpu_loop + 1) == dpu_loop_cnt) ? (num_dpu_needed % num_dpus) : num_dpus;
 
         DPU_FOREACH(set, dpu, each_dpu)
         {
+            //if (each_dpu < num_dpu_needed_iter)
             DPU_ASSERT(dpu_prepare_xfer(dpu, &in_arr[(dpu_loop * num_dpus + each_dpu) * BUFFER_SIZE]));
         }
         DPU_ASSERT(dpu_push_xfer(set, DPU_XFER_TO_DPU, "mem", 0, sizeof(uint32_t) * BUFFER_SIZE, DPU_XFER_ASYNC));
@@ -65,6 +67,7 @@ void sort_dpu(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
         DPU_FOREACH(set, dpu, each_dpu)
         {
             // get data from the dpu
+            //if (each_dpu < num_dpu_needed_iter)
             DPU_ASSERT(dpu_prepare_xfer(dpu, &out_arr[(dpu_loop * num_dpus + each_dpu) * BUFFER_SIZE]));
             // DPU_ASSERT(dpu_log_read(dpu, stdout));
         }
@@ -73,10 +76,14 @@ void sort_dpu(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
         // sync barrier for all dpus
         DPU_ASSERT(dpu_sync(set));
 
-        DPU_FOREACH(set, dpu)
+        DPU_FOREACH(set, dpu, each_dpu)
         {
+            // get data from the dpu
+            //if (each_dpu < num_dpu_needed_iter)
+            //{
             DPU_ASSERT(dpu_copy_from(dpu, "execution_cycles", 0, &execution_cycles, sizeof(uint32_t)));
             DPU_ASSERT(dpu_copy_from(dpu, "execution_time", 0, &execution_time, sizeof(double)));
+            // }
         }
     }
     // release the allocated dpus
@@ -140,6 +147,6 @@ void merge_blocks(int i, int j, uint32_t *a, uint32_t *aux)
 void sort(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
 {
     sort_dpu(size, in_arr, out_arr);
-    //print_arr_2("Post-dpu sort", out_arr, 2048);
+    //print_arr_2("Post-dpu sort", out_arr, arr_size);
     merge_blocks(0, size - 1, out_arr, in_arr);
 }
