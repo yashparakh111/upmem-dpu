@@ -28,13 +28,6 @@ BARRIER_INIT(my_barrier, NR_TASKLETS);
 __mram_noinit uint32_t mem[BUFFER_SIZE];
 __dma_aligned uint32_t cache[2][NR_TASKLETS][CACHE_SIZE]; // wram
 
-void populate_data() {
-	uint32_t mem_temp[BUFFER_SIZE] = {33, 36, 27, 15, 43, 35, 36, 42, 49, 21, 12, 27, 40, 9, 13, 26, 40, 26, 22, 36, 11, 18, 17, 29, 32, 30, 12, 23, 17, 35, 29, 2, 22, 8, 19, 17, 43, 6, 11, 42, 29, 23, 21, 19, 34, 37, 48, 24, 15, 20, 13, 26, 41, 30, 6, 23, 12, 20, 46, 31, 5, 25, 34, 27};
-	for (int i = 0; i < BUFFER_SIZE; i++) {
-		mem[i] = mem_temp[i];
-	}
-}
-
 void print_arr(char *name, __mram_ptr uint32_t *arr, int size)
 {
     printf("%s: ", name);
