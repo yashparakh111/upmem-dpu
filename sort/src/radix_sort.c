@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <perfcounter.h>
+#include <alloc.h>
 
 #include <mram.h>
 #include <defs.h>
@@ -27,25 +28,26 @@ BARRIER_INIT(my_barrier, NR_TASKLETS);
 
 __mram_noinit uint32_t mem[BUFFER_SIZE];
 __dma_aligned uint32_t cache[2][NR_TASKLETS][CACHE_SIZE]; // wram
+__host uint32_t execution_cycles;
+__host double execution_time;
 
-void print_arr(char *name, __mram_ptr uint32_t *arr, int size)
-{
-    printf("%s: ", name);
-    for (int i = 0; i < size; i++)
-    {
-        printf("%02u ", arr[i]);
-    }
-    printf("\n\n");
-}
+// void print_arr(char *name, __mram_ptr uint32_t *arr, int size)
+// {
+//     printf("%s: ", name);
+//     for (int i = 0; i < size; i++)
+//     {
+//         printf("%02u ", arr[i]);
+//     }
+//     printf("\n\n");
+// }
 
 void merge(uint32_t *unmerged_wram,
-			uint32_t *merge_buf_wram, 
-			__mram_ptr uint32_t *merged_mram,
-			__mram_ptr uint32_t *empty_mram,
-			uint32_t num_merged_chunks
-			)
+		   uint32_t *merge_buf_wram,
+		   __mram_ptr uint32_t *merged_mram,
+		   __mram_ptr uint32_t *empty_mram,
+		   uint32_t num_merged_chunks)
 {
-	
+
 	seqreader_buffer_t local_cache;
 	seqreader_t sr;
 
@@ -99,6 +101,7 @@ void merge(uint32_t *unmerged_wram,
 		// increment empty by CACHE_SIZE
 		empty_mram += CACHE_SIZE;
 	}
+	//mem_reset();
 }
 
 int main()
@@ -162,31 +165,26 @@ int main()
 		// n-way merge
 		merge(cache[cache_type][tid], cache[cache_type ^ 1][tid], &mem[c + CACHE_SIZE], &mem[c], num_merged_chunks);
 		num_merged_chunks++;
+		
+		barrier_wait(&my_barrier);
+		mem_reset();
 
 		// write back sorted part
 		//mram_write(&cache[cache_type][tid][cache_type], &mem[c], sizeof(uint32_t) * CACHE_SIZE);
 	}
 
-	barrier_wait(&my_barrier);
-
-
-	// merge sorted blocks
-	
-
-
 	/*** End perf count ***/
 	barrier_wait(&my_barrier);
 	if (tid == 0)
 	{
-		// print_arr("arr", mem, BUFFER_SIZE);
-
 		// print results
 		perfcounter_t end_time = perfcounter_get();
-		// printf("%lu\n", end_time);
-
-		// print_data();
+		execution_cycles = end_time;
+		execution_time = ((double)end_time) / CLOCKS_PER_SEC;
+		// printf("Execution Time: %lu\n", end_time);
 	}
 	/************************/
+	// barrier_wait(&my_barrier);
 
 	return 0;
 }

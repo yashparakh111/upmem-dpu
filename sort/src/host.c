@@ -9,6 +9,9 @@
 #include "config.h"
 #include "sort.h"
 
+extern uint32_t execution_cycles;
+extern double execution_time;
+
 int comp(const void *elem1, const void *elem2)
 {
   int f = *((int *)elem1);
@@ -30,7 +33,7 @@ void gen_rand_arr(uint32_t *arr, int size)
 
 void print_arr(char *name, uint32_t *arr, int size)
 {
-  printf("%s: ", name);
+  printf("%s: \n", name);
   for (int i = 0; i < size; i++)
   {
     printf("%02u ", arr[i]);
@@ -38,28 +41,52 @@ void print_arr(char *name, uint32_t *arr, int size)
   printf("\n\n");
 }
 
-bool verify_chunks(uint32_t *dpu_arr, uint32_t *cpu_arr, int size, int chunk_size)
+void verify(uint32_t *dpu_arr, uint32_t *golden_arr, uint32_t *cpu_arr, int size, int chunk_size)
 {
   uint32_t golden_chunk[chunk_size];
   uint32_t iters = size / chunk_size;
   bool pass = true;
+  bool sorted = true;
+
+  // verify at chunk granularity
   for (int i = 0; i < iters; i++)
   {
     uint32_t base = i * chunk_size;
     memcpy(golden_chunk, &cpu_arr[base], sizeof(uint32_t) * chunk_size);
     qsort(golden_chunk, chunk_size, sizeof(uint32_t), comp);
-
+    // if (i == 2)
+    // {
+    //   print_arr("actual 2", dpu_arr + i * chunk_size, chunk_size);
+    //   print_arr("golden 2", golden_chunk, chunk_size);
+    // }
+    bool chunk_sorted = true;
     for (int j = 0; j < chunk_size; j++)
     {
       if (golden_chunk[j] != dpu_arr[base + j])
       {
-        printf("Error at block: %d, idx: %d. Expected %d, got %d\n", i, j,
-               golden_chunk[j], dpu_arr[base + j]);
+        // printf("Error at block: %d, idx: %d. Expected %d, got %d\n", i, j,
+        //        golden_chunk[j], dpu_arr[base + j]);
+        chunk_sorted = false;
         pass = false;
       }
     }
+    // printf("Chunk %d: %d\n", i, chunk_sorted);
   }
-  return pass;
+  if (pass)
+    printf("Chunks Sorted!\n");
+  else
+    printf("Chunks Unsorted!\n");
+
+  // verify entire arry
+  for (int i = 0; i < size; i++)
+  {
+    if (golden_arr[i] != dpu_arr[i])
+      sorted = false;
+  }
+  if (sorted)
+    printf("Success!\n");
+  else
+    printf("Failure!\n");
 }
 
 void prepare_data(uint32_t nargs, uint32_t size, ...)
@@ -114,14 +141,21 @@ int main(int argc, char *argv[])
   }
 
   // safety checks
-  assert(BLOCK_SIZE > CACHE_SIZE);
   assert(arr_size >= BUFFER_SIZE);
+  assert(BUFFER_SIZE >= BLOCK_SIZE);
+  assert(BLOCK_SIZE >= CACHE_SIZE);
 
   // alloc array space
   prepare_data(3, arr_size, &in_arr, &out_arr, &out_arr_golden);
 
   // generate input array
   gen_rand_arr(in_arr, arr_size);
+
+  // print input array
+  if (do_arr_print)
+  {
+    print_arr("In", in_arr, 2048);
+  }
 
   // perform cpu+dpu sort
   sort(arr_size, in_arr, out_arr);
@@ -133,31 +167,18 @@ int main(int argc, char *argv[])
   // print results
   if (do_arr_print)
   {
-    print_arr("In", in_arr, arr_size);
-    print_arr("Out DPU", out_arr, arr_size);
-    print_arr("Out CPU", out_arr_golden, arr_size);
+    print_arr("Out DPU", out_arr, 2048);
+    print_arr("Out CPU", out_arr_golden, 2048);
   }
 
   // verify results
-  num_dpu_needed = (arr_size + (BUFFER_SIZE - 1)) / BUFFER_SIZE;
-  if (verify_chunks(out_arr, in_arr, arr_size, arr_size / (num_dpu_needed * NR_TASKLETS)))
-    printf("Chunks Sorted!\n");
-  else
-    printf("Unsorted Chunks\n");
-
-  bool sorted = true;
-  for (int i = 0; i < arr_size; i++)
-  {
-    if (out_arr_golden[i] != out_arr[i])
-      sorted = false;
-  }
-  if (sorted)
-    printf("Fully Sorted\n");
-  else
-    printf("Unsorted\n");
+  // num_dpu_needed = (arr_size + (BUFFER_SIZE - 1)) / BUFFER_SIZE;
+  verify(out_arr, out_arr_golden, in_arr, arr_size, BUFFER_SIZE / NR_TASKLETS);
 
   // free array space
   free_data(3, in_arr, out_arr, out_arr_golden);
+
+  printf("%d %d %d %f\n", arr_size, CACHE_SIZE, execution_cycles, execution_time);
 
   return 0;
 }
