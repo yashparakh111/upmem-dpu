@@ -12,10 +12,10 @@ CFLAGS := -std=c99 -I$(INC_DIR) -DNR_TASKLETS=$(NR_TASKLETS)
 
 all: host
 
-host: $(SRC_DIR)/host.c $(SRC_DIR)/sort.c $(INCS) | $(BUILD_DIR)
+host: $(SRC_DIR)/host.c $(SRC_DIR)/sort.c $(BUILD_DIR)/radix_sort $(INCS) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -o $@ $(SRC_DIR)/host.c $(SRC_DIR)/sort.c `dpu-pkg-config --cflags --libs dpu`
 
-$(BUILD_DIR)/radix_sort: $(SRC_DIR)/radix_sort.c $(INC_DIR)/config.h
+$(BUILD_DIR)/radix_sort: $(SRC_DIR)/radix_sort.c $(INC_DIR)/config.h | $(BUILD_DIR)
 	dpu-upmem-dpurte-clang -O2 -Iinc -DNR_TASKLETS=$(NR_TASKLETS) -o $@ $(SRC_DIR)/radix_sort.c
 
 $(BUILD_DIR):
