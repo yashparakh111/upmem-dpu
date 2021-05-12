@@ -5,6 +5,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <assert.h>
+#include <time.h>
 
 #include "config.h"
 #include "sort.h"
@@ -158,7 +159,12 @@ int main(int argc, char *argv[])
   }
 
   // perform cpu+dpu sort
+  clock_t start, end;
+  double exec_time;
+  start = clock();
   sort(arr_size, in_arr, out_arr);
+  end = clock();
+  exec_time = (((double)(end - start)));
 
   // generate golden data
   memcpy(out_arr_golden, in_arr, sizeof(uint32_t) * arr_size);
@@ -181,7 +187,7 @@ int main(int argc, char *argv[])
   // free(out_arr);
   // free(out_arr_golden);
 
-  printf("%d %d %d %f\n", arr_size, CACHE_SIZE, execution_cycles, execution_time);
+  printf("%d %d %d %f %f\n", arr_size, CACHE_SIZE, execution_cycles, execution_time, exec_time);
 
   return 0;
 }
