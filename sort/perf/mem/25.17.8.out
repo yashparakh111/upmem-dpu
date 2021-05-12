@@ -1,0 +1,49 @@
+  33554432   131072  256 1.32376   7.61204   8.9358   Chunks_Unsorted Success 
+[31m[1m*** WRAM write ***[0m
+   size   	  number  	 bandwidth  	 duration 	function names
+[92m[1m/dev/dpu_rank0:[0m
+   2.027MB	    1     	  95.002MB/s	  21.332ms	dpu_copy_to_wram_for_rank
+[92m[1m/dev/dpu_rank1:[0m
+   2.027MB	    1     	  90.761MB/s	  22.329ms	dpu_copy_to_wram_for_rank
+[92m[1m/dev/dpu_rank10:[0m
+   2.027MB	    1     	  92.567MB/s	  21.893ms	dpu_copy_to_wram_for_rank
+[92m[1m/dev/dpu_rank11:[0m
+   2.027MB	    1     	  93.626MB/s	  21.646ms	dpu_copy_to_wram_for_rank
+[92m[1mAverage:[0m
+   2.027MB	    4     	  92.963MB/s	  21.800ms	dpu_copy_to_wram_for_rank
+[31m[1m*** MRAM write ***[0m
+   size   	  number  	 bandwidth  	 duration 	function names
+[92m[1m/dev/dpu_rank0:[0m
+  32.000MB	    1     	   1.483GB/s	  21.066ms	dpu_copy_to_mrams_64dpus
+[92m[1m/dev/dpu_rank1:[0m
+  32.000MB	    1     	 756.799MB/s	  42.283ms	dpu_copy_to_mrams_64dpus
+[92m[1m/dev/dpu_rank10:[0m
+  32.000MB	    1     	   1.407GB/s	  22.207ms	dpu_copy_to_mrams_64dpus
+[92m[1m/dev/dpu_rank11:[0m
+  32.000MB	    1     	 752.014MB/s	  42.552ms	dpu_copy_to_mrams_64dpus
+[92m[1mAverage:[0m
+  32.000MB	    4     	 999.156MB/s	  32.027ms	dpu_copy_to_mrams_64dpus
+[31m[1m*** MRAM read ***[0m
+   size   	  number  	 bandwidth  	 duration 	function names
+[92m[1m/dev/dpu_rank0:[0m
+  32.000MB	    1     	 872.787MB/s	  36.664ms	dpu_copy_from_mrams_64dpus
+[92m[1m/dev/dpu_rank1:[0m
+  32.000MB	    1     	 664.829MB/s	  48.133ms	dpu_copy_from_mrams_64dpus
+[92m[1m/dev/dpu_rank10:[0m
+  32.000MB	    1     	 950.128MB/s	  33.680ms	dpu_copy_from_mrams_64dpus
+[92m[1m/dev/dpu_rank11:[0m
+  32.000MB	    1     	 700.130MB/s	  45.706ms	dpu_copy_from_mrams_64dpus
+[92m[1mAverage:[0m
+  32.000MB	    4     	 779.621MB/s	  41.046ms	dpu_copy_from_mrams_64dpus
+[31m[1m*** IRAM write ***[0m
+   size   	  number  	 bandwidth  	 duration 	function names
+[92m[1m/dev/dpu_rank0:[0m
+  10.625KB	    1     	  24.113MB/s	 430.305us	dpu_copy_to_iram_for_rank
+[92m[1m/dev/dpu_rank1:[0m
+  10.625KB	    1     	  25.257MB/s	 410.815us	dpu_copy_to_iram_for_rank
+[92m[1m/dev/dpu_rank10:[0m
+  10.625KB	    1     	  26.134MB/s	 397.027us	dpu_copy_to_iram_for_rank
+[92m[1m/dev/dpu_rank11:[0m
+  10.625KB	    1     	  26.026MB/s	 398.675us	dpu_copy_to_iram_for_rank
+[92m[1mAverage:[0m
+  10.625KB	    4     	  25.356MB/s	 409.205us	dpu_copy_to_iram_for_rank

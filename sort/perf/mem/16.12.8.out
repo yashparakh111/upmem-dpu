@@ -1,0 +1,50 @@
+     65536     4096  256 0.048966   0.023438   0.072404   Chunks_Unsorted Success 
+[31m[1m*** WRAM write ***[0m
+   size   	  number  	 bandwidth  	 duration 	function names
+[92m[1m/dev/dpu_rank0:[0m
+   2.027MB	    1     	 105.858MB/s	  19.145ms	dpu_copy_to_wram_for_rank
+[92m[1mAverage:[0m
+   2.027MB	    1     	 105.858MB/s	  19.145ms	dpu_copy_to_wram_for_rank
+[31m[1m*** MRAM write ***[0m
+   size   	  number  	 bandwidth  	 duration 	function names
+[92m[1m/dev/dpu_rank0:[0m
+ 256.000KB	    1     	 582.487MB/s	 429.194us	dpu_copy_to_mrams_16dpus
+[92m[1mAverage:[0m
+ 256.000KB	    1     	 582.487MB/s	 429.194us	dpu_copy_to_mrams_16dpus
+[31m[1m*** MRAM read ***[0m
+   size   	  number  	 bandwidth  	 duration 	function names
+[92m[1m/dev/dpu_rank0:[0m
+ 256.000KB	    1     	 393.422MB/s	 635.450us	dpu_copy_from_mrams_16dpus
+[92m[1mAverage:[0m
+ 256.000KB	    1     	 393.422MB/s	 635.450us	dpu_copy_from_mrams_16dpus
+[31m[1m*** IRAM write ***[0m
+   size   	  number  	 bandwidth  	 duration 	function names
+[92m[1m/dev/dpu_rank0:[0m
+  10.562KB	    1     	  24.410MB/s	 422.566us	dpu_copy_to_iram_for_rank
+[92m[1mAverage:[0m
+  10.562KB	    1     	  24.410MB/s	 422.566us	dpu_copy_to_iram_for_rank
+     65536     4096  256 0.049823   0.02501   0.074833   Chunks_Unsorted Success 
+[31m[1m*** WRAM write ***[0m
+   size   	  number  	 bandwidth  	 duration 	function names
+[92m[1m/dev/dpu_rank0:[0m
+   2.027MB	    1     	 104.583MB/s	  19.378ms	dpu_copy_to_wram_for_rank
+[92m[1mAverage:[0m
+   2.027MB	    1     	 104.583MB/s	  19.378ms	dpu_copy_to_wram_for_rank
+[31m[1m*** MRAM write ***[0m
+   size   	  number  	 bandwidth  	 duration 	function names
+[92m[1m/dev/dpu_rank0:[0m
+ 256.000KB	    1     	 549.054MB/s	 455.329us	dpu_copy_to_mrams_16dpus
+[92m[1mAverage:[0m
+ 256.000KB	    1     	 549.054MB/s	 455.329us	dpu_copy_to_mrams_16dpus
+[31m[1m*** MRAM read ***[0m
+   size   	  number  	 bandwidth  	 duration 	function names
+[92m[1m/dev/dpu_rank0:[0m
+ 256.000KB	    1     	 416.985MB/s	 599.542us	dpu_copy_from_mrams_16dpus
+[92m[1mAverage:[0m
+ 256.000KB	    1     	 416.985MB/s	 599.542us	dpu_copy_from_mrams_16dpus
+[31m[1m*** IRAM write ***[0m
+   size   	  number  	 bandwidth  	 duration 	function names
+[92m[1m/dev/dpu_rank0:[0m
+  10.562KB	    1     	  24.280MB/s	 424.829us	dpu_copy_to_iram_for_rank
+[92m[1mAverage:[0m
+  10.562KB	    1     	  24.280MB/s	 424.829us	dpu_copy_to_iram_for_rank

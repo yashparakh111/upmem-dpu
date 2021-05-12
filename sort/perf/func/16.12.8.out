@@ -1,0 +1,3 @@
+Could not add probe on ./host_cpp:probe_host_cpp:host_cpp_APPLICATION_FUNCTIONS=APPLICATION_FUNCTIONS:254
+Please make sure to follow instructions given in "Application profiling" section of the documentation.
+Do you want to continue anyway? (Y/n/a) 

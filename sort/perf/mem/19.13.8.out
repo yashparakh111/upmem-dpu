@@ -1,0 +1,25 @@
+    524288     8192  256 0.056407   0.118556   0.174963   Chunks_Unsorted Success 
+[31m[1m*** WRAM write ***[0m
+   size   	  number  	 bandwidth  	 duration 	function names
+[92m[1m/dev/dpu_rank0:[0m
+   2.027MB	    1     	 110.828MB/s	  18.286ms	dpu_copy_to_wram_for_rank
+[92m[1mAverage:[0m
+   2.027MB	    1     	 110.828MB/s	  18.286ms	dpu_copy_to_wram_for_rank
+[31m[1m*** MRAM write ***[0m
+   size   	  number  	 bandwidth  	 duration 	function names
+[92m[1m/dev/dpu_rank0:[0m
+   2.000MB	    1     	   1.049GB/s	   1.861ms	dpu_copy_to_mrams_64dpus
+[92m[1mAverage:[0m
+   2.000MB	    1     	   1.049GB/s	   1.861ms	dpu_copy_to_mrams_64dpus
+[31m[1m*** MRAM read ***[0m
+   size   	  number  	 bandwidth  	 duration 	function names
+[92m[1m/dev/dpu_rank0:[0m
+   2.000MB	    1     	   1.828GB/s	   1.069ms	dpu_copy_from_mrams_64dpus
+[92m[1mAverage:[0m
+   2.000MB	    1     	   1.828GB/s	   1.069ms	dpu_copy_from_mrams_64dpus
+[31m[1m*** IRAM write ***[0m
+   size   	  number  	 bandwidth  	 duration 	function names
+[92m[1m/dev/dpu_rank0:[0m
+  10.625KB	    1     	  24.554MB/s	 422.583us	dpu_copy_to_iram_for_rank
+[92m[1mAverage:[0m
+  10.625KB	    1     	  24.554MB/s	 422.583us	dpu_copy_to_iram_for_rank
