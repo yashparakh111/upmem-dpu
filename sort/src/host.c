@@ -164,10 +164,11 @@ int main(int argc, char *argv[])
   start = clock();
   sort(arr_size, in_arr, out_arr);
   end = clock();
-  exec_time = (((double)(end - start)));
+  exec_time = (((double)(end - start)) / CLOCKS_PER_SEC);
 
   // generate golden data
   memcpy(out_arr_golden, in_arr, sizeof(uint32_t) * arr_size);
+
   qsort(out_arr_golden, arr_size, sizeof(uint32_t), comp);
 
   // print results
@@ -187,7 +188,7 @@ int main(int argc, char *argv[])
   // free(out_arr);
   // free(out_arr_golden);
 
-  printf("%d %d %d %f %f\n", arr_size, CACHE_SIZE, execution_cycles, execution_time, exec_time);
+  printf("%d %d %d %d %f %f\n", arr_size, BUFFER_SIZE, CACHE_SIZE, execution_cycles, execution_time, exec_time);
 
   return 0;
 }

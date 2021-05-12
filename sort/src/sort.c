@@ -33,15 +33,15 @@ void sort_dpu(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
     uint32_t each_dpu, num_dpus, num_dpu_needed;
 
     num_dpu_needed = (size + (BUFFER_SIZE - 1)) / BUFFER_SIZE;
-    uint32_t dpu_alloc_ct = (num_dpu_needed > 64) ? 64 : num_dpu_needed;
-    DPU_ASSERT(dpu_alloc(dpu_alloc_ct, "backend=simulator", &set));
+    uint32_t dpu_alloc_ct = (num_dpu_needed > DPU_ALLOCATE_ALL) ? DPU_ALLOCATE_ALL : num_dpu_needed;
+    DPU_ASSERT(dpu_alloc(dpu_alloc_ct, NULL, &set));
     DPU_ASSERT(dpu_get_nr_dpus(set, &num_dpus));
 
     int dpu_loop_cnt = (num_dpu_needed + (num_dpus - 1)) / num_dpus;
 
     //printf("Number of DPUs needed: %d\n", num_dpu_needed);
-    printf("Using %u dpu(s)\n", num_dpus);
-    printf("Using %u dpu loop(s)\n", dpu_loop_cnt);
+    //printf("Using %u dpu(s)\n", num_dpus);
+    //printf("Using %u dpu loop(s)\n", dpu_loop_cnt);
 
     // load the binary into the dpu
     DPU_ASSERT(dpu_load(set, DPU_BINARY, NULL));
@@ -53,7 +53,7 @@ void sort_dpu(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
         //printf("loop: %d\n", dpu_loop);
         //may not need all dpus for last loop -- TODO
         uint32_t num_dpu_needed_iter = ((dpu_loop + 1) == dpu_loop_cnt) ? (dpu_alloc_ct - (num_dpu_needed % num_dpus)) : num_dpus;
-        printf("Need %d DPUs for cycle %d\n", num_dpu_needed_iter, dpu_loop);
+        //printf("Need %d DPUs for cycle %d\n", num_dpu_needed_iter, dpu_loop);
 
         DPU_FOREACH(set, dpu, each_dpu)
         {
