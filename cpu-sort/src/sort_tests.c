@@ -50,9 +50,7 @@ int main(int argc, char *argv[]) {
         arr_size = atoi(argv[1]);
     }
 
-    prepare_data(1, arr_size, in_arr);
-    uint32_t *arr;
-    arr = (uint32_t *)malloc(sizeof(uint32_t) * size);
+    prepare_data(1, arr_size, &in_arr);
     gen_rand_arr(in_arr, arr_size);
 
     clock_t start, end;
@@ -64,7 +62,5 @@ int main(int argc, char *argv[]) {
 
     exec_time = (((double)(end - start)) / CLOCKS_PER_SEC);
     printf("Size: %d, Execution Time: %f\n", arr_size, exec_time);
-
-
 
 }
