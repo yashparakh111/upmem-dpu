@@ -10,9 +10,6 @@
 #include "config.h"
 #include "sort.h"
 
-extern uint32_t execution_cycles;
-extern double execution_time;
-
 int comp(const void *elem1, const void *elem2)
 {
   int f = *((int *)elem1);
@@ -143,6 +140,7 @@ int main(int argc, char *argv[])
 
   // safety checks
   assert(arr_size >= BUFFER_SIZE);
+  assert(MAX_BUFFER_SIZE >= BUFFER_SIZE);
   assert(BUFFER_SIZE >= BLOCK_SIZE);
   assert(BLOCK_SIZE >= CACHE_SIZE);
 
@@ -158,13 +156,10 @@ int main(int argc, char *argv[])
     print_arr("In", in_arr, arr_size);
   }
 
+  printf("%d %d %d ", arr_size, BUFFER_SIZE, CACHE_SIZE);
+
   // perform cpu+dpu sort
-  clock_t start, end;
-  double exec_time;
-  start = clock();
-  sort(arr_size, in_arr, out_arr);
-  end = clock();
-  exec_time = (((double)(end - start)) / CLOCKS_PER_SEC);
+  sort_pim(arr_size, in_arr, out_arr);
 
   // generate golden data
   memcpy(out_arr_golden, in_arr, sizeof(uint32_t) * arr_size);
@@ -188,7 +183,7 @@ int main(int argc, char *argv[])
   // free(out_arr);
   // free(out_arr_golden);
 
-  printf("%d %d %d %d %f %f\n", arr_size, BUFFER_SIZE, CACHE_SIZE, execution_cycles, execution_time, exec_time);
+  printf("\n");
 
   return 0;
 }

@@ -6,15 +6,13 @@
 
 #include <dpu.h>
 #include <dpu_log.h>
+#include <time.h>
 
 #include "config.h"
 
 #ifndef DPU_BINARY
-#define DPU_BINARY "./build/radix_sort"
+#define DPU_BINARY "./build/dpu_sort"
 #endif
-
-uint32_t execution_cycles;
-double execution_time;
 
 void print_arr_2(char *name, uint32_t *arr, int size)
 {
@@ -30,14 +28,14 @@ void print_arr_2(char *name, uint32_t *arr, int size)
 void sort_dpu(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
 {
     struct dpu_set_t set, dpu;
-    uint32_t each_dpu, num_dpus, num_dpu_needed;
+    uint32_t each_dpu, num_dpus, num_dpu_needed, dpu_alloc_ct, dpu_loop_cnt;
 
     num_dpu_needed = (size + (BUFFER_SIZE - 1)) / BUFFER_SIZE;
-    uint32_t dpu_alloc_ct = (num_dpu_needed > DPU_ALLOCATE_ALL) ? DPU_ALLOCATE_ALL : num_dpu_needed;
+    dpu_alloc_ct = (num_dpu_needed > DPU_ALLOCATE_ALL) ? DPU_ALLOCATE_ALL : num_dpu_needed;
     DPU_ASSERT(dpu_alloc(dpu_alloc_ct, NULL, &set));
     DPU_ASSERT(dpu_get_nr_dpus(set, &num_dpus));
 
-    int dpu_loop_cnt = (num_dpu_needed + (num_dpus - 1)) / num_dpus;
+    dpu_loop_cnt = (num_dpu_needed + (num_dpus - 1)) / num_dpus;
 
     //printf("Number of DPUs needed: %d\n", num_dpu_needed);
     //printf("Using %u dpu(s)\n", num_dpus);
@@ -51,7 +49,7 @@ void sort_dpu(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
     for (int dpu_loop = 0; dpu_loop < dpu_loop_cnt; dpu_loop++)
     {
         //printf("loop: %d\n", dpu_loop);
-        //may not need all dpus for last loop -- TODO
+        //may not need all dpus for last loo..8}
         uint32_t num_dpu_needed_iter = ((dpu_loop + 1) == dpu_loop_cnt) ? (dpu_alloc_ct - (num_dpu_needed % num_dpus)) : num_dpus;
         //printf("Need %d DPUs for cycle %d\n", num_dpu_needed_iter, dpu_loop);
 
@@ -78,16 +76,6 @@ void sort_dpu(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
         // sync barrier for all dpus
 
         DPU_ASSERT(dpu_sync(set));
-        
-        DPU_FOREACH(set, dpu, each_dpu)
-        {
-            // get data from the dpu
-            //if (each_dpu < num_dpu_needed_iter)
-            //{
-            DPU_ASSERT(dpu_copy_from(dpu, "execution_cycles", 0, &execution_cycles, sizeof(uint32_t)));
-            DPU_ASSERT(dpu_copy_from(dpu, "execution_time", 0, &execution_time, sizeof(double)));
-            // }
-        }
     }
     // release the allocated dpus
     DPU_ASSERT(dpu_free(set));
@@ -147,9 +135,22 @@ void merge_blocks(int i, int j, uint32_t *a, uint32_t *aux)
     }
 }
 
-void sort(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
+void sort_pim(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
 {
+    clock_t start, mid, end;
+    double dpu_exec_time, cpu_exec_time;
+
+    start = clock();
+
     sort_dpu(size, in_arr, out_arr);
-    //print_arr_2("Post-dpu sort", out_arr, arr_size);
+
+    mid = clock();
+
     merge_blocks(0, size - 1, out_arr, in_arr);
+
+    end = clock();
+    
+    dpu_exec_time = (((double)(mid - start)) / CLOCKS_PER_SEC);
+    cpu_exec_time = (((double)(end - mid)) / CLOCKS_PER_SEC);
+    printf("%f %f %f ", dpu_exec_time, cpu_exec_time, dpu_exec_time + cpu_exec_time);
 }

@@ -1,6 +1,7 @@
 sort/build
 
-sort/host
+sort/host_c
+sort/host_cpp
 
 sort/trace*
 
