@@ -1,18 +1,5 @@
-1024 1024 8 0.041607 7.2e-05 Chunks_Unsorted Success 
-2048 2048 8 0.094426 0.000125 Chunks_Unsorted Success 
-4096 4096 8 0.255081 0.000238 Chunks_Unsorted Success 
-8192 8192 8 0.777968 0.000427 Chunks_Unsorted Success 
-16384 16384 8 2.55546 0.00088 Chunks_Unsorted Success 
-32768 32768 8 9.28532 0.001628 Chunks_Unsorted Success 
-1024 1024 16 0.05853 7.5e-05 Chunks_Unsorted Success 
-2048 2048 16 0.076224 0.000131 Chunks_Unsorted Success 
-4096 4096 16 0.226319 0.000341 Chunks_Unsorted Success 
-8192 8192 16 0.523732 0.000438 Chunks_Unsorted Success 
-16384 16384 16 1.51682 0.000845 Chunks_Unsorted Success 
-32768 32768 16 5.25093 0.001643 Chunks_Unsorted Success 
-1024 1024 32 0.032089 7.1e-05 Chunks_Unsorted Success 
-2048 2048 32 0.065152 0.000127 Chunks_Unsorted Success 
-4096 4096 32 0.145566 0.000229 Chunks_Unsorted Success 
-8192 8192 32 0.400249 0.00043 Chunks_Unsorted Success 
-16384 16384 32 1.04343 0.000837 Chunks_Unsorted Success 
-32768 32768 32 2.98078 0.001925 Chunks_Unsorted Success 
+      1024     1024    8 0.013881   7.4e-05   0.013955   Chunks_Unsorted Success 
+      2048     2048    8 0.048228   0.00014   0.048368   Chunks_Unsorted Success 
+      4096     4096    8 0.152827   0.00024   0.153067   Chunks_Unsorted Success 
+      8192     8192    8 0.556998   0.000495   0.557493   Chunks_Unsorted Success 
+     16384    16384    8 2.29664   0.00087   2.29751   Chunks_Unsorted Success 

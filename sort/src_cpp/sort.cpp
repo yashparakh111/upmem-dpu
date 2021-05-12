@@ -10,6 +10,7 @@
 #define DPU_BINARY "./build/dpu_sort"
 #endif
 
+
 using namespace dpu;
 
 // sorts the in_arr in BUFFER_SIZE chunks
@@ -25,7 +26,7 @@ void sort_dpu(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
     num_dpus = dpus.size();
     dpu_loop_cnt = (num_dpu_needed + (num_dpus - 1)) / num_dpus;
     num_dpu_needed = (size + (BUFFER_SIZE - 1)) / BUFFER_SIZE;
-    dpu_alloc_ct = (num_dpu_needed > DPU_ALLOCATE_ALL) ? DPU_ALLOCATE_ALL : num_dpu_needed;
+    dpu_alloc_ct = (num_dpu_needed > MAX_DPU_AVAIL) ? MAX_DPU_AVAIL : num_dpu_needed;
 
     printf("Number of DPUs needed: %d\n", num_dpu_needed);
     printf("Using %u dpu(s)\n", num_dpus);
@@ -76,18 +77,19 @@ void sort_dpu_c_api(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
 {
     struct dpu_set_t set, dpu;
     uint32_t each_dpu, num_dpus, num_dpu_needed, dpu_alloc_ct, dpu_loop_cnt;
-
+    
     num_dpu_needed = (size + (BUFFER_SIZE - 1)) / BUFFER_SIZE;
-    dpu_alloc_ct = (num_dpu_needed > DPU_ALLOCATE_ALL) ? DPU_ALLOCATE_ALL : num_dpu_needed;
+    dpu_alloc_ct = (num_dpu_needed > MAX_DPU_AVAIL) ? MAX_DPU_AVAIL : num_dpu_needed;
 
-    DPU_ASSERT(dpu_alloc(dpu_alloc_ct, NULL, &set));
+    // printf("Max: %d, DPU_alloc: %d, num_dpu_needed: %d\n", MAX_DPU_AVAIL, dpu_alloc_ct, num_dpu_needed);
+    DPU_ASSERT(dpu_alloc(dpu_alloc_ct, "backend=simulator", &set));
     DPU_ASSERT(dpu_get_nr_dpus(set, &num_dpus));
 
     dpu_loop_cnt = (num_dpu_needed + (num_dpus - 1)) / num_dpus;
 
-    //printf("Number of DPUs needed: %d\n", num_dpu_needed);
-    //printf("Using %u dpu(s)\n", num_dpus);
-    //printf("Using %u dpu loop(s)\n", dpu_loop_cnt);
+    // printf("Number of DPUs needed: %d\n", num_dpu_needed);
+    // printf("Using %u dpu(s)\n", num_dpus);
+    // printf("Using %u dpu loop(s)\n", dpu_loop_cnt);
 
     // load the binary into the dpu
     DPU_ASSERT(dpu_load(set, DPU_BINARY, NULL));
@@ -103,8 +105,8 @@ void sort_dpu_c_api(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
 
         DPU_FOREACH(set, dpu, each_dpu)
         {
-            //if (each_dpu < num_dpu_needed_iter)
-            DPU_ASSERT(dpu_prepare_xfer(dpu, &in_arr[(dpu_loop * num_dpus + each_dpu) * BUFFER_SIZE]));
+            if (each_dpu < num_dpu_needed_iter)
+                DPU_ASSERT(dpu_prepare_xfer(dpu, &in_arr[(dpu_loop * num_dpus + each_dpu) * BUFFER_SIZE]));
         }
         DPU_ASSERT(dpu_push_xfer(set, DPU_XFER_TO_DPU, "mem", 0, sizeof(uint32_t) * BUFFER_SIZE, DPU_XFER_ASYNC));
 
@@ -115,8 +117,8 @@ void sort_dpu_c_api(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
         DPU_FOREACH(set, dpu, each_dpu)
         {
             // get data from the dpu
-            //if (each_dpu < num_dpu_needed_iter)
-            DPU_ASSERT(dpu_prepare_xfer(dpu, &out_arr[(dpu_loop * num_dpus + each_dpu) * BUFFER_SIZE]));
+            if (each_dpu < num_dpu_needed_iter)
+                DPU_ASSERT(dpu_prepare_xfer(dpu, &out_arr[(dpu_loop * num_dpus + each_dpu) * BUFFER_SIZE]));
             // DPU_ASSERT(dpu_log_read(dpu, stdout));
         }
         DPU_ASSERT(dpu_push_xfer(set, DPU_XFER_FROM_DPU, "mem", 0, sizeof(uint32_t) * BUFFER_SIZE, DPU_XFER_ASYNC));
@@ -165,5 +167,5 @@ void sort_pim(std::vector<uint32_t> in_arr, std::vector<uint32_t> &out_arr)
     dpu_exec_time = (((double)(mid - start)) / CLOCKS_PER_SEC);
     cpu_exec_time = (((double)(end - mid)) / CLOCKS_PER_SEC);
 
-    std::cout << dpu_exec_time << " " << cpu_exec_time << " " << dpu_exec_time + cpu_exec_time << " ";
+    std::cout << dpu_exec_time << "   " << cpu_exec_time << "   " << dpu_exec_time + cpu_exec_time << "   ";
 }

@@ -31,8 +31,8 @@ void sort_dpu(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
     uint32_t each_dpu, num_dpus, num_dpu_needed, dpu_alloc_ct, dpu_loop_cnt;
 
     num_dpu_needed = (size + (BUFFER_SIZE - 1)) / BUFFER_SIZE;
-    dpu_alloc_ct = (num_dpu_needed > DPU_ALLOCATE_ALL) ? DPU_ALLOCATE_ALL : num_dpu_needed;
-    DPU_ASSERT(dpu_alloc(dpu_alloc_ct, NULL, &set));
+    dpu_alloc_ct = (num_dpu_needed > MAX_DPU_AVAIL) ? MAX_DPU_AVAIL : num_dpu_needed;
+    DPU_ASSERT(dpu_alloc(dpu_alloc_ct, "backend=simulator", &set));
     DPU_ASSERT(dpu_get_nr_dpus(set, &num_dpus));
 
     dpu_loop_cnt = (num_dpu_needed + (num_dpus - 1)) / num_dpus;
@@ -152,5 +152,5 @@ void sort_pim(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
     
     dpu_exec_time = (((double)(mid - start)) / CLOCKS_PER_SEC);
     cpu_exec_time = (((double)(end - mid)) / CLOCKS_PER_SEC);
-    printf("%f %f %f ", dpu_exec_time, cpu_exec_time, dpu_exec_time + cpu_exec_time);
+    printf("%f   %f   %f ", dpu_exec_time, cpu_exec_time, dpu_exec_time + cpu_exec_time);
 }

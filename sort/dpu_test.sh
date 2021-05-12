@@ -1,6 +1,6 @@
 #!/bin/bash
 DIR=$(dirname $0)
-OUTFILE=r$(basename $0 .sh)
+OUTFILE=results/$(basename $0 .sh)
 COUT=$OUTFILE.c.out
 CPPOUT=$OUTFILE.cpp.out
 

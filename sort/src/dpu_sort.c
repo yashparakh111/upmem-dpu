@@ -137,7 +137,6 @@ void merge(int tid,
 		// increment empty by CACHE_SIZE
 		empty_mram += CACHE_SIZE;
 	}
-
 }
 
 void radix_sort(int tid, uint32_t *cache_type_ptr)
@@ -181,22 +180,29 @@ void radix_sort(int tid, uint32_t *cache_type_ptr)
 	*cache_type_ptr = cache_type;
 }
 
-void insertion_sort(int tid, uint32_t cache_type)
+void insertion_sort(uint32_t *my_cache)
 {
-	uint32_t *curr_val, *comp_val;
 	for (int i = 1; i < CACHE_SIZE; i++)
 	{
-		curr_val = &(cache[cache_type][tid][i]);
-		for (int j = i - 1; j >= 0; j--)
-		{
-			comp_val = &(cache[cache_type][tid][j]);
-			if (*curr_val < *comp_val)
-			{
-				// perform swap
-				uint32_t swap_val = *comp_val;
-				*curr_val = *comp_val;
-				*comp_val = swap_val;
+		/*uint32_t curr_val = my_cache[i];
+		for (int j = i - 1; j >= 0; j--) {
+			if (curr_val < cache[cache_type][tid][j]) {
+				int temp = cache[cache_type][tid][j+1];
+				cache[cache_type][tid][j+1] = curr_val;
+				cache[cache_type][tid][i] = temp;
+				continue;
 			}
+			else 
+				cache[cache_type][tid][j+1] = cache[cache_type][tid][j]; 
+		}*/
+
+		int j = i - 1;
+		while (j >= 0 && my_cache[j] > my_cache[j + 1])
+		{
+			uint32_t swap_val = my_cache[j];
+			my_cache[j] = my_cache[j + 1];
+			my_cache[j + 1] = swap_val;
+			j--;
 		}
 	}
 }
@@ -230,11 +236,10 @@ int main()
 #endif
 
 #ifdef USE_INSERTION_SORT
-		insertion_sort(tid, cache_type);
+		insertion_sort(cache[cache_type][tid]);
 #else
 		radix_sort(tid, &cache_type);
 #endif
-
 		// n-way merge
 		merge(tid, cache[cache_type][tid], cache[cache_type ^ 1][tid], &mem[c + CACHE_SIZE], &mem[c], num_merged_chunks);
 		num_merged_chunks++;

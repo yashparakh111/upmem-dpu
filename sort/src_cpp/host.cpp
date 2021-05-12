@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
     print_arr("In", in_arr);
   }
 
-  printf("%d %d %d ", arr_size, BUFFER_SIZE, CACHE_SIZE);
+  printf("% 10d % 8d % 4d ", arr_size, BUFFER_SIZE, CACHE_SIZE);
 
   sort_pim(in_arr, out_arr);
 
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
     print_arr("Out DPU", out_arr);
   }
 
-  verify(out_arr, out_arr_golden, in_arr, BUFFER_SIZE / NR_TASKLETS);
+  verify(out_arr, out_arr_golden, in_arr, BLOCK_SIZE);
 
   cout << endl;
   return 0;

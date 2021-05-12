@@ -33,11 +33,11 @@ int main(int argc, char *argv[])
     arr[i] = rand() % 100; //Generate number between 0 to 99
 
   auto t1 = high_resolution_clock::now();
-  std::sort(std::execution::par_unseq, arr, arr + arr_size);
+  std::sort(std::execution::par, arr, arr + arr_size);
   auto t2 = high_resolution_clock::now();
 
   /* Getting number of milliseconds as a double. */
   duration<double, std::milli> ms_double = t2 - t1;
 
-  std::cout << "Size: " << arr_size << ", Execution Time: " << ms_double.count() / 1000 << std::endl;
+  std::cout << arr_size << " " << ms_double.count() / 1000 << std::endl;
 }

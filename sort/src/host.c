@@ -43,7 +43,7 @@ void verify(uint32_t *dpu_arr, uint32_t *golden_arr, uint32_t *cpu_arr, int size
 {
   uint32_t golden_chunk[chunk_size];
   uint32_t iters = size / chunk_size;
-  bool pass = true;
+  bool chunk_sorted = true;
   bool sorted = true;
 
   // verify at chunk granularity
@@ -57,7 +57,6 @@ void verify(uint32_t *dpu_arr, uint32_t *golden_arr, uint32_t *cpu_arr, int size
     //   print_arr("actual 2", dpu_arr + i * chunk_size, chunk_size);
     //   print_arr("golden 2", golden_chunk, chunk_size);
     // }
-    bool chunk_sorted = true;
     for (int j = 0; j < chunk_size; j++)
     {
       if (golden_chunk[j] != dpu_arr[base + j])
@@ -65,12 +64,11 @@ void verify(uint32_t *dpu_arr, uint32_t *golden_arr, uint32_t *cpu_arr, int size
         // printf("Error at block: %d, idx: %d. Expected %d, got %d\n", i, j,
         //        golden_chunk[j], dpu_arr[base + j]);
         chunk_sorted = false;
-        pass = false;
       }
     }
     // printf("Chunk %d: %d\n", i, chunk_sorted);
   }
-  if (pass)
+  if (chunk_sorted)
     printf("Chunks_Sorted ");
   else
     printf("Chunks_Unsorted ");
@@ -150,21 +148,27 @@ int main(int argc, char *argv[])
   // generate input array
   gen_rand_arr(in_arr, arr_size);
 
+  // generate golden data
+  memcpy(out_arr_golden, in_arr, sizeof(uint32_t) * arr_size);
+  qsort(out_arr_golden, arr_size, sizeof(uint32_t), comp);
+
   // print input array
   if (do_arr_print)
   {
     print_arr("In", in_arr, arr_size);
   }
 
-  printf("%d %d %d ", arr_size, BUFFER_SIZE, CACHE_SIZE);
+  printf("% 10d % 8d % 4d ", arr_size, BUFFER_SIZE, CACHE_SIZE);
 
   // perform cpu+dpu sort
   sort_pim(arr_size, in_arr, out_arr);
 
-  // generate golden data
-  memcpy(out_arr_golden, in_arr, sizeof(uint32_t) * arr_size);
+  // verify results
+  verify(out_arr, out_arr_golden, in_arr, arr_size, BLOCK_SIZE);
+  printf("\n");
 
-  qsort(out_arr_golden, arr_size, sizeof(uint32_t), comp);
+  // free array space
+  // free_data(3, in_arr, out_arr, out_arr_golden);
 
   // print results
   if (do_arr_print)
@@ -172,18 +176,5 @@ int main(int argc, char *argv[])
     print_arr("Out DPU", out_arr, arr_size);
     print_arr("Out CPU", out_arr_golden, arr_size);
   }
-
-  // verify results
-  // num_dpu_needed = (arr_size + (BUFFER_SIZE - 1)) / BUFFER_SIZE;
-  verify(out_arr, out_arr_golden, in_arr, arr_size, BUFFER_SIZE / NR_TASKLETS);
-
-  // free array space
-  // free_data(3, in_arr, out_arr, out_arr_golden);
-  // free(in_arr);
-  // free(out_arr);
-  // free(out_arr_golden);
-
-  printf("\n");
-
   return 0;
 }
