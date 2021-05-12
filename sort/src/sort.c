@@ -3,19 +3,15 @@
  */
 
 #include <stdio.h>
-/*
+
 #include <dpu.h>
 #include <dpu_log.h>
-*/
 
-#include <dpu>
 #include "config.h"
 
 #ifndef DPU_BINARY
 #define DPU_BINARY "./build/radix_sort"
 #endif
-
-using namespace dpu;
 
 uint32_t execution_cycles;
 double execution_time;
@@ -38,20 +34,17 @@ void sort_dpu(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
 
     num_dpu_needed = (size + (BUFFER_SIZE - 1)) / BUFFER_SIZE;
     uint32_t dpu_alloc_ct = (num_dpu_needed > DPU_ALLOCATE_ALL) ? DPU_ALLOCATE_ALL : num_dpu_needed;
-
-    auto system = DpuSet::allocate(dpu_alloc_cnt);
+    DPU_ASSERT(dpu_alloc(dpu_alloc_ct, NULL, &set));
+    DPU_ASSERT(dpu_get_nr_dpus(set, &num_dpus));
 
     int dpu_loop_cnt = (num_dpu_needed + (num_dpus - 1)) / num_dpus;
-    num_dpus = systems.dpus().size();
-
-    for (auto dpu = system.dpus().begin(); dpu != system.dpus().end(); ++dpu)
-    {
-        dpu->load(DPU_BINARY);
-    }
 
     //printf("Number of DPUs needed: %d\n", num_dpu_needed);
     //printf("Using %u dpu(s)\n", num_dpus);
     //printf("Using %u dpu loop(s)\n", dpu_loop_cnt);
+
+    // load the binary into the dpu
+    DPU_ASSERT(dpu_load(set, DPU_BINARY, NULL));
 
     // load data into the dpu
     // using xfer lets us maximize transfer bandwidth
@@ -62,10 +55,10 @@ void sort_dpu(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
         uint32_t num_dpu_needed_iter = ((dpu_loop + 1) == dpu_loop_cnt) ? (dpu_alloc_ct - (num_dpu_needed % num_dpus)) : num_dpus;
         //printf("Need %d DPUs for cycle %d\n", num_dpu_needed_iter, dpu_loop);
 
-        for (auto dpu = system.dpus().begin(); dpu != system.dpus().end(); ++dpu))
+        DPU_FOREACH(set, dpu, each_dpu)
         {
-                dpu->copy("mem", )
-                dpu->exec();
+            //if (each_dpu < num_dpu_needed_iter)
+            DPU_ASSERT(dpu_prepare_xfer(dpu, &in_arr[(dpu_loop * num_dpus + each_dpu) * BUFFER_SIZE]));
         }
         DPU_ASSERT(dpu_push_xfer(set, DPU_XFER_TO_DPU, "mem", 0, sizeof(uint32_t) * BUFFER_SIZE, DPU_XFER_ASYNC));
 
@@ -85,7 +78,7 @@ void sort_dpu(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
         // sync barrier for all dpus
 
         DPU_ASSERT(dpu_sync(set));
-
+        
         DPU_FOREACH(set, dpu, each_dpu)
         {
             // get data from the dpu
