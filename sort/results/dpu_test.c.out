@@ -1,0 +1,5 @@
+      1024     1024    8 0.021259   0.000028   0.021287 Chunks_Sorted Success 
+      2048     2048    8 0.044298   0.000050   0.044348 Chunks_Sorted Success 
+      4096     4096    8 0.148633   0.000087   0.148720 Chunks_Sorted Success 
+      8192     8192    8 0.580456   0.000215   0.580671 Chunks_Sorted Success 
+     16384    16384    8 2.267776   0.000282   2.268058 Chunks_Sorted Success 

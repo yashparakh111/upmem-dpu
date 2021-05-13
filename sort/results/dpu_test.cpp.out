@@ -1,18 +1,5 @@
-      1024     1024    8  32 32   0.210715   0.211875  0.000239  0.212114   Chunks_Unsorted Success 
-      2048     1024    8  32 32   0.192191   0.192814  0.000182  0.192996   Chunks_Unsorted Success 
-      4096     1024    8  32 32   0.194698   0.195329  0.000415  0.195744   Chunks_Unsorted Success 
-      8192     1024    8  32 32   0.188846   0.189489  0.000934  0.190423   Chunks_Unsorted Success 
-     16384     1024    8  32 32   0.201255   0.201821  0.002169   0.20399   Chunks_Unsorted Success 
-     32768     1024    8  32 32    0.21549   0.216168  0.004823  0.220991   Chunks_Unsorted Success 
-      1024     1024   16  32 32   0.220494   0.221371  0.000202  0.221573   Chunks_Unsorted Success 
-      2048     1024   16  32 32   0.139133   0.139673  0.000181  0.139854   Chunks_Unsorted Success 
-      4096     1024   16  32 32   0.134543   0.135095  0.000414  0.135509   Chunks_Unsorted Success 
-      8192     1024   16  32 32   0.145285   0.145958  0.000949  0.146907   Chunks_Unsorted Success 
-     16384     1024   16  32 32   0.163993   0.164557  0.002102  0.166659   Chunks_Unsorted Success 
-     32768     1024   16  32 32   0.212229   0.212959  0.004655  0.217614   Chunks_Unsorted Success 
-      1024     1024   32  32 32     0.1022    0.10361  0.000178  0.103788   Chunks_Unsorted Success 
-      2048     1024   32  32 32   0.094705   0.095236  0.000176  0.095412   Chunks_Unsorted Success 
-      4096     1024   32  32 32   0.119178   0.119849  0.000415  0.120264   Chunks_Unsorted Success 
-      8192     1024   32  32 32   0.154381   0.155003  0.000938  0.155941   Chunks_Unsorted Success 
-     16384     1024   32  32 32   0.175384   0.176016  0.002157  0.178173   Chunks_Unsorted Success 
-     32768     1024   32  32 32   0.260692   0.261353  0.004631  0.265984   Chunks_Unsorted Success 
+      1024     1024    8 0.013881   7.4e-05   0.013955   Chunks_Unsorted Success 
+      2048     2048    8 0.048228   0.00014   0.048368   Chunks_Unsorted Success 
+      4096     4096    8 0.152827   0.00024   0.153067   Chunks_Unsorted Success 
+      8192     8192    8 0.556998   0.000495   0.557493   Chunks_Unsorted Success 
+     16384    16384    8 2.29664   0.00087   2.29751   Chunks_Unsorted Success 
