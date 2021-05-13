@@ -136,6 +136,8 @@ void merge(int tid,
 
 		// increment empty by CACHE_SIZE
 		empty_mram += CACHE_SIZE;
+
+		
 	}
 }
 
@@ -245,7 +247,7 @@ int main()
 		num_merged_chunks++;
 	}
 
-	// barrier_wait(&my_barrier);
+	//barrier_wait(&my_barrier);
 
 	/*** End perf count ***/
 	// if (tid == 0)
@@ -257,7 +259,7 @@ int main()
 	// printf("Execution Time: %lu\n", end_time);
 	// }
 	/************************/
-	// barrier_wait(&my_barrier);
-
+	barrier_wait(&my_barrier);
+	mem_reset();
 	return 0;
 }
