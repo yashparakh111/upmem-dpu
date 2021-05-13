@@ -223,7 +223,14 @@ int main()
 	/************************/
 
 	int tid = me();
-	uint32_t num_merged_chunks = 0;
+	
+    if(tid == 0){
+        mem_reset();
+    }
+
+    barrier_wait(&my_barrier);
+
+    uint32_t num_merged_chunks = 0;
 	uint32_t cache_type = 0;
 
 	local_cache[tid] = seqread_alloc();
@@ -259,7 +266,5 @@ int main()
 	// printf("Execution Time: %lu\n", end_time);
 	// }
 	/************************/
-	barrier_wait(&my_barrier);
-	mem_reset();
 	return 0;
 }
