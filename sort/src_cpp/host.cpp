@@ -65,51 +65,60 @@ void verify(vector<uint32_t> dpu_arr, vector<uint32_t> golden_arr, vector<uint32
 
 int main(int argc, char *argv[])
 {
-  uint32_t arr_size;
-  bool do_print;
+  uint32_t min_arr_size, max_arr_size;
+  bool do_print = 0;
 
   srand(uint32_t(time(nullptr)));
 
-  if (argc != 3)
+  if (argc < 4)
   {
     cout << "Usage: ./host <arr_size> [<print>]";
   }
   else
   {
-    arr_size = stoi(argv[1]);
-    do_print = (bool)stoi(argv[2]);
+    min_arr_size = (1 << stoi(argv[1]));
+    max_arr_size = (1 << stoi(argv[2]));
+    do_print = (bool)stoi(argv[3]);
   }
 
-  assert(arr_size >= BUFFER_SIZE);
-  assert(MAX_BUFFER_SIZE >= BUFFER_SIZE);
-  assert(BUFFER_SIZE >= BLOCK_SIZE);
-  assert(BLOCK_SIZE >= CACHE_SIZE);
+  allocate_dpus(max_arr_size);
+  
+  for(uint32_t arr_size = min_arr_size; arr_size <= max_arr_size; arr_size <<= 1){
+    assert(arr_size >= BUFFER_SIZE);
+    assert(MAX_BUFFER_SIZE >= BUFFER_SIZE);
+    assert(BUFFER_SIZE >= BLOCK_SIZE);
+    assert(BLOCK_SIZE >= CACHE_SIZE);
 
-  std::vector<uint32_t> in_arr(arr_size);
-  std::vector<uint32_t> out_arr(arr_size);
+    std::vector<uint32_t> in_arr(arr_size);
+    std::vector<uint32_t> out_arr(arr_size);
 
-  generate(in_arr.begin(), in_arr.end(), rand_fn);
-  std::vector<uint32_t> out_arr_golden = in_arr;
+    generate(in_arr.begin(), in_arr.end(), rand_fn);
+    std::vector<uint32_t> out_arr_golden = in_arr;
 
-  if (do_print)
-  {
-    print_arr("In", in_arr);
+    if (do_print)
+    {
+      print_arr("In", in_arr);
+    }
+
+    printf("% 10d % 8d % 4d ", arr_size, BUFFER_SIZE, CACHE_SIZE);
+
+    sort_pim(in_arr, out_arr);
+
+    sort(out_arr_golden.begin(), out_arr_golden.end());
+
+    if (do_print)
+    {
+      print_arr("Out CPU", out_arr_golden);
+      print_arr("Out DPU", out_arr);
+    }
+
+    verify(out_arr, out_arr_golden, in_arr, BLOCK_SIZE);
+
+    cout << endl;
   }
 
-  printf("% 10d % 8d % 4d ", arr_size, BUFFER_SIZE, CACHE_SIZE);
+  free_dpus();
 
-  sort_pim(in_arr, out_arr);
 
-  sort(out_arr_golden.begin(), out_arr_golden.end());
-
-  if (do_print)
-  {
-    print_arr("Out CPU", out_arr_golden);
-    print_arr("Out DPU", out_arr);
-  }
-
-  verify(out_arr, out_arr_golden, in_arr, BLOCK_SIZE);
-
-  cout << endl;
   return 0;
 }

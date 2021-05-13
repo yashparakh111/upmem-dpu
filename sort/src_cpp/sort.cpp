@@ -13,6 +13,9 @@
 
 using namespace dpu;
 
+
+uint32_t dpu_alloc_ct, num_dpus, num_ranks;
+
 // sorts the in_arr in BUFFER_SIZE chunks
 void sort_dpu(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
 {
@@ -75,39 +78,47 @@ void sort_dpu(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
   // automatic release of allocated dpus by destructor
 }
 
+struct dpu_set_t set;
+
+void allocate_dpus(uint32_t size){
+
+  uint32_t num_dpu_needed;
+
+  num_dpu_needed = (size + (BUFFER_SIZE - 1)) / BUFFER_SIZE;
+  dpu_alloc_ct = (num_dpu_needed > MAX_DPU_AVAIL) ? MAX_DPU_AVAIL : num_dpu_needed;
+
+  DPU_ASSERT(dpu_alloc(dpu_alloc_ct, "backend=simulator", &set));
+  // load the binary into the dpu
+  DPU_ASSERT(dpu_load(set, DPU_BINARY, NULL));
+}
+
 // sorts the in_arr in BUFFER_SIZE chunks
 void sort_dpu_c_api(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
 {
-  struct dpu_set_t set, dpu;
-  uint32_t each_dpu, num_dpus, num_ranks, num_dpu_needed, dpu_alloc_ct, dpu_loop_cnt;
+  struct dpu_set_t dpu;
+  //uint32_t num_dpus, num_ranks, dpu_alloc_ct,
+  uint32_t each_dpu, num_dpu_needed, dpu_loop_cnt;
 
   num_dpu_needed = (size + (BUFFER_SIZE - 1)) / BUFFER_SIZE;
   dpu_alloc_ct = (num_dpu_needed > MAX_DPU_AVAIL) ? MAX_DPU_AVAIL : num_dpu_needed;
 
   // printf("Max: %d, DPU_alloc: %d, num_dpu_needed: %d\n", MAX_DPU_AVAIL, dpu_alloc_ct, num_dpu_needed);
-  DPU_ASSERT(dpu_alloc(dpu_alloc_ct, "backend=simulator", &set));
+  //DPU_ASSERT(dpu_alloc(dpu_alloc_ct, "backend=simulator", &set));
   DPU_ASSERT(dpu_get_nr_dpus(set, &num_dpus));
   DPU_ASSERT(dpu_get_nr_ranks(set, &num_ranks));
 
-  std::cout << std::setw(3) << num_dpus << std::setw(3) << num_ranks << " ";
-
   dpu_loop_cnt = (num_dpu_needed + (num_dpus - 1)) / num_dpus;
 
-  // printf("Number of DPUs needed: %d\n", num_dpu_needed);
-  // printf("Using %u dpu(s)\n", num_dpus);
-  // printf("Using %u dpu loop(s)\n", dpu_loop_cnt);
-
-  // load the binary into the dpu
-  DPU_ASSERT(dpu_load(set, DPU_BINARY, NULL));
-
-  clock_t start = clock();
+  //printf("Number of DPUs needed: %d\n", num_dpu_needed);
+  //printf("Using %u dpu(s)\n", num_dpus);
+  //printf("Using %u dpu loop(s)\n", dpu_loop_cnt);
   // load data into the dpu
   // using xfer lets us maximize transfer bandwidth
   for (int dpu_loop = 0; dpu_loop < dpu_loop_cnt; dpu_loop++)
   {
     //printf("loop: %d\n", dpu_loop);
     //may not need all dpus for last loop -- TODO
-    uint32_t num_dpu_needed_iter = ((dpu_loop + 1) == dpu_loop_cnt) ? (dpu_alloc_ct - (num_dpu_needed % num_dpus)) : num_dpus;
+    uint32_t num_dpu_needed_iter = ((dpu_loop + 1) == dpu_loop_cnt) ? (dpu_alloc_ct - (num_dpu_needed % dpu_alloc_ct)) : dpu_alloc_ct;
     //printf("Need %d DPUs for cycle %d\n", num_dpu_needed_iter, dpu_loop);
 
     DPU_FOREACH(set, dpu, each_dpu)
@@ -135,32 +146,14 @@ void sort_dpu_c_api(uint32_t size, uint32_t *in_arr, uint32_t *out_arr)
     DPU_ASSERT(dpu_sync(set));
   }
 
-  clock_t end = clock();
+  // release the allocated dpus
+  //DPU_ASSERT(dpu_free(set));
+}
 
-  double dpu_time = ((double)(end - start)) / CLOCKS_PER_SEC;
-
-  std::cout << std::setw(10) << dpu_time << " ";
-
+void free_dpus(void) {
   // release the allocated dpus
   DPU_ASSERT(dpu_free(set));
 }
-
-/*void merge_blocks(std::vector<uint32_t> &arr, int block_size)
-{
-  int blocks = arr.size() / block_size;
-  for (int i = blocks; i > 1; i >>= 1)
-  {
-    int merge_block_size = arr.size() / i;
-    //cout << "Iter: " << i << "  MergeBS: " << merge_block_size <<  endl;
-    for (int j = 0; j < (i >> 1); j++)
-    {
-      std::vector<uint32_t>::iterator left_merge = arr.begin() + (j << 1) * merge_block_size;
-      std::vector<uint32_t>::iterator mid_merge = left_merge + merge_block_size;
-      std::vector<uint32_t>::iterator right_merge = mid_merge + merge_block_size;
-      std::inplace_merge(left_merge, mid_merge, right_merge);
-    }
-  }
-}*/
 
 #define INPLACE
 void merge_blocks(std::vector<uint32_t> &arr, std::vector<uint32_t> &scratch, int block_size)
@@ -225,5 +218,5 @@ void sort_pim(std::vector<uint32_t> in_arr, std::vector<uint32_t> &out_arr)
   dpu_exec_time = (((double)(mid - start)) / CLOCKS_PER_SEC);
   cpu_exec_time = (((double)(end - mid)) / CLOCKS_PER_SEC);
 
-  std::cout << std::setw(10) << dpu_exec_time << std::setw(10) << cpu_exec_time << std::setw(10) << dpu_exec_time + cpu_exec_time << "   ";
+  std::cout << std::setw(3) << dpu_alloc_ct << std::setw(3) << num_dpus << std::setw(3) << num_ranks << " " << std::setw(10) << dpu_exec_time << std::setw(10) << cpu_exec_time << std::setw(10) << dpu_exec_time + cpu_exec_time << "   ";
 }

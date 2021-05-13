@@ -7,4 +7,8 @@
 /* sort in_arr into out_arr */
 void sort_pim(std::vector<uint32_t> in_arr, std::vector<uint32_t> &out_arr);
 
+void allocate_dpus(uint32_t size);
+
+void free_dpus(void);
+
 #endif /* __SORT_H__ */

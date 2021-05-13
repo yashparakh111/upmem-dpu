@@ -24,7 +24,7 @@ DEFS := -DNR_TASKLETS=$(NR_TASKLETS) -DCACHE_SIZE=$(CACHE_SIZE) -DBUFFER_SIZE=$(
 
 .PHONY: all clean
 
-all: host_c host_cpp
+all: host_cpp
 
 host_c: $(SRC_DIR)/host.c $(SRC_DIR)/sort.c $(BUILD_DIR)/dpu_sort $(INCS) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(DEFS) -o $@ $(SRC_DIR)/host.c $(SRC_DIR)/sort.c `dpu-pkg-config --cflags --libs dpu`
