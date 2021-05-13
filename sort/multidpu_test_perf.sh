@@ -20,7 +20,7 @@ do
                 #$DIR/host_c $((1<<$arr_log)) 0 >> $COUT
                 # dpu-profiling memory-transfer -- $DIR/host_cpp $((1<<$arr_log)) 0 >> perf/mem/$arr_log.$buf_log.$cache_log.out
                 # dpu-profiling functions -f "APPLICATION_FUNCTIONS" -d "DPU_HOST_API_FUNCTIONS" -- $DIR/host_cpp $((1<<$arr_log)) 0 >> perf/func/$arr_log.$buf_log.$cache_log.out
-                dpu-profiling functions -o perf/traces/$arr_log.$buf_log.$cache_log.json -A -- $DIR/host_cpp $((1<<$arr_log)) 0 
+                dpu-profiling functions -A -a -o perf/traces/$arr_log.$buf_log.$cache_log.json -- $DIR/host_cpp $((1<<$arr_log)) 0 
             fi
         done
     done
