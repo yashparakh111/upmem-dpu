@@ -186,18 +186,6 @@ void insertion_sort(uint32_t *my_cache)
 {
 	for (int i = 1; i < CACHE_SIZE; i++)
 	{
-		/*uint32_t curr_val = my_cache[i];
-		for (int j = i - 1; j >= 0; j--) {
-			if (curr_val < cache[cache_type][tid][j]) {
-				int temp = cache[cache_type][tid][j+1];
-				cache[cache_type][tid][j+1] = curr_val;
-				cache[cache_type][tid][i] = temp;
-				continue;
-			}
-			else 
-				cache[cache_type][tid][j+1] = cache[cache_type][tid][j]; 
-		}*/
-
 		int j = i - 1;
 		while (j >= 0 && my_cache[j] > my_cache[j + 1])
 		{
@@ -254,8 +242,21 @@ int main()
 		num_merged_chunks++;
 	}
 
-	//barrier_wait(&my_barrier);
+#ifdef DPU_MERGE
+	barrier_wait(&my_barrier);
 
+	for(int l = 1; l <= (1 << 0); l <<= 1) {
+		num_merged_chunks = l * (BLOCK_SIZE / CACHE_SIZE);
+
+		if((tid & ((1<<l)-1)) == 0) {
+			for(int i = ((tid+l) * BLOCK_SIZE) - CACHE_SIZE; i >= tid * BLOCK_SIZE; i -= CACHE_SIZE) {
+				mram_read(&mem[i], &cache[cache_type][tid][0], sizeof(uint32_t) * CACHE_SIZE);
+				merge(tid, cache[cache_type][tid], cache[cache_type ^ 1][tid], &mem[i + CACHE_SIZE], &mem[i], num_merged_chunks);
+				num_merged_chunks++;
+			}
+		}
+	}
+#endif
 	/*** End perf count ***/
 	// if (tid == 0)
 	// {

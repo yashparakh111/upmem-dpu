@@ -211,7 +211,11 @@ void sort_pim(std::vector<uint32_t> in_arr, std::vector<uint32_t> &out_arr)
   mid = clock();
 
   // cpu sort
-  merge_blocks(out_arr, in_arr, BUFFER_SIZE / NR_TASKLETS);
+#ifdef DPU_MERGE
+  merge_blocks(out_arr, in_arr, BLOCK_SIZE * 2);
+#else
+  merge_blocks(out_arr, in_arr, BLOCK_SIZE);
+#endif
 
   end = clock();
 

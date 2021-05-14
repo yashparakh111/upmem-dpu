@@ -19,7 +19,7 @@ CPP := g++
 CPPFLAGS := -std=c++17 -I$(INC_DIR_CPP)
 
 
-DEFS := -DNR_TASKLETS=$(NR_TASKLETS) -DCACHE_SIZE=$(CACHE_SIZE) -DBUFFER_SIZE=$(BUFFER_SIZE)
+DEFS := -DNR_TASKLETS=$(NR_TASKLETS) -DCACHE_SIZE=$(CACHE_SIZE) -DBUFFER_SIZE=$(BUFFER_SIZE) -DDPU_MERGE
 
 
 .PHONY: all clean
@@ -33,7 +33,7 @@ host_cpp: $(SRC_DIR_CPP)/host.cpp $(SRC_DIR_CPP)/sort.cpp $(BUILD_DIR)/dpu_sort 
 	$(CPP) $(CPPFLAGS) $(DEFS) -o $@ $(SRC_DIR_CPP)/host.cpp $(SRC_DIR_CPP)/sort.cpp `dpu-pkg-config --cflags --libs dpu`
 
 $(BUILD_DIR)/dpu_sort: $(SRC_DIR)/dpu_sort.c $(INC_DIR)/config.h | $(BUILD_DIR)
-	dpu-upmem-dpurte-clang -O2 -Iinc -DUSE_INSERTION_SORT $(DEFS) -o $@ $(SRC_DIR)/dpu_sort.c
+	dpu-upmem-dpurte-clang -O2 -Iinc -DDPU_MERGE -DUSE_INSERTION_SORT $(DEFS) -o $@ $(SRC_DIR)/dpu_sort.c
 
 $(BUILD_DIR):
 	@mkdir $(BUILD_DIR) || true
